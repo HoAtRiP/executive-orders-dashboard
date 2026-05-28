@@ -1,0 +1,39 @@
+[
+  {
+    "eo_number": "EO 12345",
+    "title": "Improving Government Efficiency",
+    "president": "Jane Doe",
+    "signing_date": "2024-01-12",
+    "publication_date": "2024-01-15",
+    "citation": "89 FR 1234",
+    "pdf_url": "https://example.com/executive-order-12345.pdf",
+    "html_url": "https://www.federalregister.gov/documents/2024/01/15/89-fr-1234/improving-government-efficiency"
+  },
+  {
+    "eo_number": "EO 12346",
+    "title": "Strengthening Public Services",
+    "president": "Jane Doe",
+    "signing_date": "2024-02-02",
+    "publication_date": "2024-02-05",
+    "citation": "89 FR 2345",
+    "html_url": "https://www.federalregister.gov/documents/2024/02/05/89-fr-2345/strengthening-public-services"
+  },
+  {
+    "eo_number": "EO 12347",
+    "title": "Federal Records Modernization",
+    "president": "John Smith",
+    "signing_date": "2024-03-18",
+    "publication_date": "2024-03-21",
+    "citation": "89 FR 3456",
+    "pdf_url": "https://example.com/executive-order-12347.pdf",
+    "html_url": "https://www.federalregister.gov/documents/2024/03/21/89-fr-3456/federal-records-modernization"
+  },
+  {
+    "eo_number": "EO 12348",
+    "title": "Federal Infrastructure Review",
+    "president": "John Smith",
+    "signing_date": "2024-04-10",
+    "publication_date": "2024-04-13",
+    "citation": "89 FR 4567"
+  }
+]
