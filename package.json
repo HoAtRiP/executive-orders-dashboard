@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
+    "fetch:data": "node scripts/fetch-executive-orders.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
