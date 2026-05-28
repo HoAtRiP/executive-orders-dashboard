@@ -33,6 +33,18 @@ function App() {
       return orders;
     }
 
+    const hasPdf = (order: ExecutiveOrder) => Boolean(order.pdf_url);
+    const isPdfAvailableSearch = term === 'pdf' || term === 'available' || term === 'pdf available';
+    const isPdfUnavailableSearch = term === 'no pdf' || term === 'unavailable' || term === 'pdf unavailable';
+
+    if (isPdfAvailableSearch) {
+      return orders.filter(hasPdf);
+    }
+
+    if (isPdfUnavailableSearch) {
+      return orders.filter((order) => !hasPdf(order));
+    }
+
     return orders.filter((order) => {
       return [
         order.eo_number,
