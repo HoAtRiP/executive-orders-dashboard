@@ -57,12 +57,60 @@ const buildUrl = (page) => {
   return url.toString();
 };
 
+const PRESIDENTIAL_TERMS = [
+  { name: 'Franklin D. Roosevelt', start: '1933-03-04', end: '1945-04-12' },
+  { name: 'Harry S. Truman', start: '1945-04-12', end: '1953-01-20' },
+  { name: 'Dwight D. Eisenhower', start: '1953-01-20', end: '1961-01-20' },
+  { name: 'John F. Kennedy', start: '1961-01-20', end: '1963-11-22' },
+  { name: 'Lyndon B. Johnson', start: '1963-11-22', end: '1969-01-20' },
+  { name: 'Richard Nixon', start: '1969-01-20', end: '1974-08-09' },
+  { name: 'Gerald R. Ford', start: '1974-08-09', end: '1977-01-20' },
+  { name: 'Jimmy Carter', start: '1977-01-20', end: '1981-01-20' },
+  { name: 'Ronald Reagan', start: '1981-01-20', end: '1989-01-20' },
+  { name: 'George H.W. Bush', start: '1989-01-20', end: '1993-01-20' },
+  { name: 'William J. Clinton', start: '1993-01-20', end: '2001-01-20' },
+  { name: 'George W. Bush', start: '2001-01-20', end: '2009-01-20' },
+  { name: 'Barack Obama', start: '2009-01-20', end: '2017-01-20' },
+  { name: 'Donald J. Trump', start: '2017-01-20', end: '2021-01-20' },
+  { name: 'Joseph R. Biden, Jr.', start: '2021-01-20', end: '2025-01-20' },
+  { name: 'Donald J. Trump', start: '2025-01-20', end: '9999-12-31' },
+];
+
+const parseIsoDate = (value) => {
+  if (!value) {
+    return null;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const derivePresidentFromDate = (dateString) => {
+  const date = parseIsoDate(dateString);
+  if (!date) {
+    return null;
+  }
+
+  return (
+    PRESIDENTIAL_TERMS.find((term) => {
+      const start = new Date(term.start);
+      const end = new Date(term.end);
+      return date >= start && date < end;
+    })?.name ?? null
+  );
+};
+
 const normalizeRecord = (record) => {
   const normalized = FIELDS.reduce((acc, field) => {
     acc[field] = record[field] ?? null;
     return acc;
   }, {});
 
+  const apiPresident = record.president ?? null;
+  const dateForPresident = record.signing_date || record.publication_date || null;
+  const derivedPresident = apiPresident ? null : derivePresidentFromDate(dateForPresident);
+
+  normalized.president = apiPresident || derivedPresident || null;
+  normalized.president_source = apiPresident ? 'api' : derivedPresident ? 'derived_from_date' : 'unknown';
   normalized.pdf_available = Boolean(record.pdf_url);
 
   const dateForYear = record.signing_date || record.publication_date || '';
