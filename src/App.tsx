@@ -242,7 +242,7 @@ function App() {
                               target="_blank"
                               rel="noreferrer"
                             >
-                              Open PDF
+                              Download PDF
                             </a>
                           ) : (
                             <span className="muted">No PDF</span>
@@ -255,6 +255,16 @@ function App() {
                               rel="noreferrer"
                             >
                               Open Federal Register Page
+                            </a>
+                          ) : null}
+                          {order.json_url ? (
+                            <a
+                              className="button secondary"
+                              href={order.json_url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open Source JSON
                             </a>
                           ) : null}
                         </td>
