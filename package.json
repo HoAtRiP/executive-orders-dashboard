@@ -9,6 +9,7 @@
     "fetch:data": "node scripts/fetch-executive-orders.mjs",
     "enrich:presidents": "node scripts/enrich-presidents.mjs",
     "test:fulltext": "node scripts/test-full-text-enrichment.mjs",
+    "enrich:fulltext": "node scripts/enrich-full-text.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
