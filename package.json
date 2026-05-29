@@ -8,6 +8,7 @@
     "build": "tsc && vite build",
     "fetch:data": "node scripts/fetch-executive-orders.mjs",
     "enrich:presidents": "node scripts/enrich-presidents.mjs",
+    "test:fulltext": "node scripts/test-full-text-enrichment.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
