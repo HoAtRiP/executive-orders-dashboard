@@ -18,6 +18,28 @@ const stripTagsAndNormalize = (s) => {
   return text;
 };
 
+const stripHtmlAndNormalize = (s) => {
+  if (!s) return '';
+  // Remove script, style, and nav sections
+  let text = s.replace(/<script[\s\S]*?<\/script>/gi, ' ');
+  text = text.replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  text = text.replace(/<nav[\s\S]*?<\/nav>/gi, ' ');
+  // Remove comments
+  text = text.replace(/<!--([\s\S]*?)-->/g, ' ');
+  // Remove tags
+  text = text.replace(/<[^>]+>/g, ' ');
+  // Decode common HTML entities
+  text = text.replace(/&nbsp;/gi, ' ');
+  text = text.replace(/&amp;/gi, '&');
+  text = text.replace(/&lt;/gi, '<');
+  text = text.replace(/&gt;/gi, '>');
+  text = text.replace(/&quot;/gi, '"');
+  text = text.replace(/&#39;/gi, "'");
+  // Collapse whitespace
+  text = text.replace(/\s+/g, ' ').trim();
+  return text;
+};
+
 const parseArgs = (args) => {
   const opts = { limit: null, start: 0, all: false };
   for (const arg of args) {
@@ -55,8 +77,14 @@ async function fetchText(url) {
 
 async function enrichRecord(rec, index) {
   const eo = rec.executive_order_number ?? 'unknown';
-  const url = rec.full_text_xml_url || rec.json_url;
-  const source = rec.full_text_xml_url ? 'xml' : rec.json_url ? 'json' : null;
+  const url = rec.full_text_xml_url || rec.json_url || rec.html_url;
+  const source = rec.full_text_xml_url
+    ? 'xml'
+    : rec.json_url
+    ? 'json'
+    : rec.html_url
+    ? 'html'
+    : null;
 
   let plain = '';
   let status = 'missing_source';
@@ -69,8 +97,17 @@ async function enrichRecord(rec, index) {
     fetchedAt = new Date().toISOString();
 
     if (res.ok) {
-      plain = stripTagsAndNormalize(res.body);
-      status = 'fetched';
+      if (source === 'html') {
+        plain = stripHtmlAndNormalize(res.body);
+      } else {
+        plain = stripTagsAndNormalize(res.body);
+      }
+      if (plain) {
+        status = 'fetched';
+      } else {
+        status = 'error';
+        errorMsg = 'Readable text could not be extracted';
+      }
     } else {
       status = 'error';
       errorMsg = res.error;
