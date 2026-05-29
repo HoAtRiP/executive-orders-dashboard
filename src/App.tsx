@@ -62,7 +62,24 @@ function App() {
       if (signingDateComparison !== 0) {
         return signingDateComparison;
       }
-      return compareDatesDesc(a.publication_date, b.publication_date);
+      const pubDateComparison = compareDatesDesc(a.publication_date, b.publication_date);
+      if (pubDateComparison !== 0) {
+        return pubDateComparison;
+      }
+
+      // Tie-breaker: executive order number (numeric) descending. Non-numeric or missing
+      // EO numbers are treated as lower priority (appear later).
+      const parseEo = (val: string | number | undefined | null) => {
+        if (val == null || String(val).trim() === '') return Number.NEGATIVE_INFINITY;
+        const n = Number(String(val).replace(/[^0-9.-]+/g, ''));
+        return Number.isFinite(n) ? n : Number.NEGATIVE_INFINITY;
+      };
+
+      const numA = parseEo(a.executive_order_number);
+      const numB = parseEo(b.executive_order_number);
+
+      if (numA === numB) return 0;
+      return numB - numA;
     });
   }, [orders]);
 
