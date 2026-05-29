@@ -110,6 +110,38 @@ async function enrichRecord(rec, index) {
   return enriched;
 }
 
+const getRecordKey = (rec) => {
+  // Primary key: document_number
+  if (rec.document_number) return rec.document_number;
+  // Fallback key: composite
+  return `${rec.executive_order_number ?? ''}|${rec.publication_date ?? ''}|${rec.signing_date ?? ''}`;
+};
+
+const parseEoNumber = (val) => {
+  if (val == null || String(val).trim() === '') return Number.NEGATIVE_INFINITY;
+  const n = Number(String(val).replace(/[^0-9.-]+/g, ''));
+  return Number.isFinite(n) ? n : Number.NEGATIVE_INFINITY;
+};
+
+const sortEnrichedRecords = (records) => {
+  return [...records].sort((a, b) => {
+    // 1. signing_date descending
+    const signingDateA = a.signing_date ? new Date(a.signing_date).getTime() : 0;
+    const signingDateB = b.signing_date ? new Date(b.signing_date).getTime() : 0;
+    if (signingDateB !== signingDateA) return signingDateB - signingDateA;
+
+    // 2. publication_date descending
+    const pubDateA = a.publication_date ? new Date(a.publication_date).getTime() : 0;
+    const pubDateB = b.publication_date ? new Date(b.publication_date).getTime() : 0;
+    if (pubDateB !== pubDateA) return pubDateB - pubDateA;
+
+    // 3. executive_order_number descending (numeric)
+    const numA = parseEoNumber(a.executive_order_number);
+    const numB = parseEoNumber(b.executive_order_number);
+    return numB - numA;
+  });
+};
+
 async function main() {
   const args = process.argv.slice(2);
   const opts = parseArgs(args);
@@ -122,30 +154,61 @@ async function main() {
   const limit = opts.limit || null;
   const end = limit ? Math.min(start + limit, total) : total;
 
+  // Load existing enriched records if they exist
+  let existingEnriched = [];
+  try {
+    const existingRaw = await fs.readFile(OUTPUT_FILE, 'utf8');
+    existingEnriched = JSON.parse(existingRaw);
+  } catch {
+    // File doesn't exist yet, start fresh
+  }
+
+  const existingCount = existingEnriched.length;
+
   console.log(`\n📊 Full-text enrichment started`);
-  console.log(`   Total records: ${total}`);
+  console.log(`   Total records available: ${total}`);
+  console.log(`   Existing enriched records: ${existingCount}`);
   console.log(`   Start index: ${start}`);
   console.log(`   Limit: ${limit || 'none'}`);
   console.log(`   Processing: ${start} to ${end - 1} (${end - start} records)\n`);
 
-  const output = [];
+  const newBatch = [];
 
   for (let i = start; i < end; i++) {
     const rec = records[i];
     const enriched = await enrichRecord(rec, i);
-    output.push(enriched);
+    newBatch.push(enriched);
   }
 
-  await fs.writeFile(OUTPUT_FILE, JSON.stringify(output, null, 2), 'utf8');
+  // Merge: build a map of existing records by key
+  const existingMap = new Map();
+  for (const rec of existingEnriched) {
+    const key = getRecordKey(rec);
+    existingMap.set(key, rec);
+  }
 
-  const succeeded = output.filter((r) => r.full_text_status === 'fetched').length;
-  const missing = output.filter((r) => r.full_text_status === 'missing_source').length;
-  const errored = output.filter((r) => r.full_text_status === 'error').length;
+  // Add/update new records
+  for (const rec of newBatch) {
+    const key = getRecordKey(rec);
+    existingMap.set(key, rec); // Update if exists, add if new
+  }
+
+  // Convert back to array and sort
+  const merged = Array.from(existingMap.values());
+  const sorted = sortEnrichedRecords(merged);
+
+  await fs.writeFile(OUTPUT_FILE, JSON.stringify(sorted, null, 2), 'utf8');
+
+  const succeeded = newBatch.filter((r) => r.full_text_status === 'fetched').length;
+  const missing = newBatch.filter((r) => r.full_text_status === 'missing_source').length;
+  const errored = newBatch.filter((r) => r.full_text_status === 'error').length;
 
   console.log(`\n✨ Enrichment complete`);
-  console.log(`   Fetched: ${succeeded}`);
-  console.log(`   Missing source: ${missing}`);
-  console.log(`   Errors: ${errored}`);
+  console.log(`   New batch fetched: ${succeeded}`);
+  console.log(`   New batch missing source: ${missing}`);
+  console.log(`   New batch errors: ${errored}`);
+  console.log(`   Existing records preserved: ${existingCount}`);
+  console.log(`   Final merged output: ${sorted.length} records`);
   console.log(`   Output: ${OUTPUT_FILE.pathname}\n`);
 }
 
