@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import Fuse from 'fuse.js';
 import type { ExecutiveOrder } from './types';
 import './App.css';
 
@@ -11,9 +12,9 @@ function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const response = await fetch('/data/sample-executive-orders.json');
+        const response = await fetch('/data/executive-orders.json');
         if (!response.ok) {
-          throw new Error(`Failed to load sample data: ${response.status}`);
+          throw new Error(`Failed to load executive order data: ${response.status}`);
         }
         const data = (await response.json()) as ExecutiveOrder[];
         setOrders(data);
@@ -27,38 +28,144 @@ function App() {
     load();
   }, []);
 
-  const filteredOrders = useMemo(() => {
-    const term = search.trim().toLowerCase();
-    if (!term) {
-      return orders;
+  const normalizeSearchText = (value: string | number | undefined | null) => {
+    return String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+  };
+
+  const parseIsoDate = (value: string | number | undefined | null) => {
+    if (value == null || String(value).trim() === '') {
+      return null;
+    }
+    const date = new Date(String(value));
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
+  const compareDatesDesc = (a: string | undefined | null, b: string | undefined | null) => {
+    const dateA = parseIsoDate(a);
+    const dateB = parseIsoDate(b);
+
+    if (dateA === null && dateB === null) {
+      return 0;
+    }
+    if (dateA === null) {
+      return 1;
+    }
+    if (dateB === null) {
+      return -1;
+    }
+    return dateB.getTime() - dateA.getTime();
+  };
+
+  const sortedOrders = useMemo(() => {
+    return [...orders].sort((a, b) => {
+      const signingDateComparison = compareDatesDesc(a.signing_date, b.signing_date);
+      if (signingDateComparison !== 0) {
+        return signingDateComparison;
+      }
+      return compareDatesDesc(a.publication_date, b.publication_date);
+    });
+  }, [orders]);
+
+  const fuse = useMemo(() => {
+    return new Fuse(sortedOrders, {
+      includeScore: true,
+      threshold: 0.35,
+      ignoreLocation: true,
+      minMatchCharLength: 2,
+      keys: [
+        { name: 'executive_order_number', weight: 0.35 },
+        { name: 'president', weight: 0.25 },
+        { name: 'title', weight: 0.25 },
+        { name: 'citation', weight: 0.12 },
+        { name: 'document_number', weight: 0.12 },
+        { name: 'signing_date', weight: 0.05 },
+        { name: 'publication_date', weight: 0.05 },
+        { name: 'year', weight: 0.05 },
+        { name: 'disposition_notes', weight: 0.05 },
+        { name: 'start_page', weight: 0.02 },
+        { name: 'end_page', weight: 0.02 },
+      ],
+    });
+  }, [sortedOrders]);
+
+  const getOrderKey = (order: ExecutiveOrder) => {
+    return `${order.executive_order_number ?? ''}|${order.document_number ?? ''}|${order.signing_date ?? ''}|${order.publication_date ?? ''}`;
+  };
+
+  const addUniqueOrders = (target: ExecutiveOrder[], source: ExecutiveOrder[], seen: Set<string>) => {
+    source.forEach((order) => {
+      const key = getOrderKey(order);
+      if (!seen.has(key)) {
+        seen.add(key);
+        target.push(order);
+      }
+    });
+  };
+
+  const rankedOrders = useMemo(() => {
+    const searchText = normalizeSearchText(search);
+    if (!searchText) {
+      return sortedOrders;
     }
 
     const hasPdf = (order: ExecutiveOrder) => Boolean(order.pdf_url);
-    const isPdfAvailableSearch = term === 'pdf' || term === 'available' || term === 'pdf available';
-    const isPdfUnavailableSearch = term === 'no pdf' || term === 'unavailable' || term === 'pdf unavailable';
+    const isPdfAvailableSearch = searchText === 'pdf' || searchText === 'available' || searchText === 'pdf available';
+    const isPdfUnavailableSearch = searchText === 'no pdf' || searchText === 'unavailable' || searchText === 'pdf unavailable';
 
     if (isPdfAvailableSearch) {
-      return orders.filter(hasPdf);
+      return sortedOrders.filter(hasPdf);
     }
 
     if (isPdfUnavailableSearch) {
-      return orders.filter((order) => !hasPdf(order));
+      return sortedOrders.filter((order) => !hasPdf(order));
     }
 
-    return orders.filter((order) => {
-      return [
-        order.eo_number,
-        order.title,
-        order.president,
-        order.signing_date,
-        order.publication_date,
-        order.citation,
-      ]
-        .join(' ')
-        .toLowerCase()
-        .includes(term);
-    });
-  }, [orders, search]);
+    const normalizedValue = (value: string | number | undefined | null) => normalizeSearchText(value);
+    const exactMatch = (value: string | number | undefined | null) => normalizedValue(value) === searchText;
+    const startsWith = (value: string | number | undefined | null) => normalizedValue(value).startsWith(searchText);
+    const containsText = (value: string | number | undefined | null) => normalizedValue(value).includes(searchText);
+
+    const tier1 = sortedOrders.filter((order) => exactMatch(order.executive_order_number));
+    const tier2 = sortedOrders.filter((order) => !exactMatch(order.executive_order_number) && startsWith(order.executive_order_number));
+    const tier3 = sortedOrders.filter((order) => exactMatch(order.president));
+    const tier4 = sortedOrders.filter(
+      (order) => !exactMatch(order.president) && (startsWith(order.president) || containsText(order.president))
+    );
+    const tier5 = sortedOrders.filter((order) => exactMatch(order.title));
+    const tier6 = sortedOrders.filter(
+      (order) => !exactMatch(order.title) && (startsWith(order.title) || containsText(order.title))
+    );
+    const tier7 = sortedOrders.filter(
+      (order) => exactMatch(order.citation) || exactMatch(order.document_number)
+    );
+    const tier8 = sortedOrders.filter(
+      (order) =>
+        exactMatch(order.signing_date) ||
+        exactMatch(order.publication_date) ||
+        exactMatch(order.year) ||
+        exactMatch(order.start_page) ||
+        exactMatch(order.end_page)
+    );
+
+    const combined: ExecutiveOrder[] = [];
+    const seen = new Set<string>();
+
+    addUniqueOrders(combined, tier1, seen);
+    addUniqueOrders(combined, tier2, seen);
+    addUniqueOrders(combined, tier3, seen);
+    addUniqueOrders(combined, tier4, seen);
+    addUniqueOrders(combined, tier5, seen);
+    addUniqueOrders(combined, tier6, seen);
+    addUniqueOrders(combined, tier7, seen);
+    addUniqueOrders(combined, tier8, seen);
+
+    const fuseResults = fuse.search(searchText).map((result) => result.item);
+    addUniqueOrders(combined, fuseResults, seen);
+
+    return combined;
+  }, [fuse, search, sortedOrders]);
+
+  const displayedOrders = rankedOrders.slice(0, 100);
 
   return (
     <div className="app-shell">
@@ -67,7 +174,7 @@ function App() {
           <p className="eyebrow">Executive Orders Dashboard</p>
           <h1>Executive Orders</h1>
           <p className="subtitle">
-            Browse sample executive orders with basic metadata, PDF links, and Federal Register pages.
+            Browse executive orders with basic metadata, PDF links, and Federal Register pages.
           </p>
         </div>
         <div className="search-group">
@@ -76,7 +183,7 @@ function App() {
             id="search"
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by number, title, president, citation..."
+            placeholder="Search by number, title, president, citation, document number..."
           />
         </div>
       </header>
@@ -88,6 +195,9 @@ function App() {
           <div className="status-message error">{error}</div>
         ) : (
           <div className="table-container">
+            <div className="record-count">
+              Showing {displayedOrders.length} of {rankedOrders.length} matching records.
+            </div>
             <table>
               <caption className="sr-only">Executive order records</caption>
               <thead>
@@ -103,48 +213,54 @@ function App() {
                 </tr>
               </thead>
               <tbody>
-                {filteredOrders.length === 0 ? (
+                {rankedOrders.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="empty-state">
                       No executive orders match your search.
                     </td>
                   </tr>
                 ) : (
-                  filteredOrders.map((order) => (
-                    <tr key={order.eo_number}>
-                      <td>{order.eo_number}</td>
-                      <td>{order.title}</td>
-                      <td>{order.president}</td>
-                      <td>{order.signing_date}</td>
-                      <td>{order.publication_date}</td>
-                      <td>{order.citation}</td>
-                      <td>{order.pdf_url ? 'Available' : 'PDF unavailable'}</td>
-                      <td className="actions-cell">
-                        {order.pdf_url ? (
-                          <a
-                            className="button"
-                            href={order.pdf_url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open PDF
-                          </a>
-                        ) : (
-                          <span className="muted">No PDF</span>
-                        )}
-                        {order.html_url ? (
-                          <a
-                            className="button secondary"
-                            href={order.html_url}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            Open Federal Register Page
-                          </a>
-                        ) : null}
-                      </td>
-                    </tr>
-                  ))
+                  displayedOrders.map((order, index) => {
+                    const rowKey = order.document_number
+                      ? order.document_number
+                      : `${order.executive_order_number ?? ''}|${order.publication_date ?? ''}|${order.signing_date ?? ''}|${index}`;
+
+                    return (
+                      <tr key={rowKey}>
+                        <td>{order.executive_order_number}</td>
+                        <td>{order.title}</td>
+                        <td>{order.president}</td>
+                        <td>{order.signing_date}</td>
+                        <td>{order.publication_date}</td>
+                        <td>{order.citation}</td>
+                        <td>{order.pdf_url ? 'Available' : 'PDF unavailable'}</td>
+                        <td className="actions-cell">
+                          {order.pdf_url ? (
+                            <a
+                              className="button"
+                              href={order.pdf_url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open PDF
+                            </a>
+                          ) : (
+                            <span className="muted">No PDF</span>
+                          )}
+                          {order.html_url ? (
+                            <a
+                              className="button secondary"
+                              href={order.html_url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open Federal Register Page
+                            </a>
+                          ) : null}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>
