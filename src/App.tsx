@@ -32,6 +32,16 @@ function App() {
     return String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
   };
 
+  const normalizeEoNumber = (value: string | number | undefined | null) => {
+    return String(value ?? '').replace(/\D+/g, '').trim();
+  };
+
+  const extractExecutiveOrderNumber = (query: string | number | undefined | null) => {
+    const normalized = normalizeSearchText(query).replace(/\./g, '').replace(/-/g, ' ');
+    const match = normalized.match(/^(?:eo|executive order)?\s*([0-9]+)$/);
+    return match ? match[1] : null;
+  };
+
   const parseIsoDate = (value: string | number | undefined | null) => {
     if (value == null || String(value).trim() === '') {
       return null;
@@ -137,10 +147,15 @@ function App() {
       return sortedOrders.filter((order) => !hasPdf(order));
     }
 
+    const searchEoNumber = extractExecutiveOrderNumber(searchText);
     const normalizedValue = (value: string | number | undefined | null) => normalizeSearchText(value);
     const exactMatch = (value: string | number | undefined | null) => normalizedValue(value) === searchText;
     const startsWith = (value: string | number | undefined | null) => normalizedValue(value).startsWith(searchText);
     const containsText = (value: string | number | undefined | null) => normalizedValue(value).includes(searchText);
+
+    const matchingEoNumber = searchEoNumber
+      ? sortedOrders.filter((order) => normalizeEoNumber(order.executive_order_number) === searchEoNumber)
+      : [];
 
     const tier1 = sortedOrders.filter((order) => exactMatch(order.executive_order_number));
     const tier2 = sortedOrders.filter((order) => !exactMatch(order.executive_order_number) && startsWith(order.executive_order_number));
@@ -167,6 +182,9 @@ function App() {
     const combined: ExecutiveOrder[] = [];
     const seen = new Set<string>();
 
+    if (searchEoNumber) {
+      addUniqueOrders(combined, matchingEoNumber, seen);
+    }
     addUniqueOrders(combined, tier1, seen);
     addUniqueOrders(combined, tier2, seen);
     addUniqueOrders(combined, tier3, seen);
