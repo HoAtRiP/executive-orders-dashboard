@@ -5,6 +5,7 @@ import './App.css';
 
 function App() {
   const [orders, setOrders] = useState<ExecutiveOrder[]>([]);
+  const [fullTextRecords, setFullTextRecords] = useState<any[]>([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -12,12 +13,23 @@ function App() {
   useEffect(() => {
     const load = async () => {
       try {
-        const response = await fetch('/data/executive-orders.json');
-        if (!response.ok) {
-          throw new Error(`Failed to load executive order data: ${response.status}`);
+        const [metaResponse, fullTextResponse] = await Promise.all([
+          fetch('/data/executive-orders.json'),
+          fetch('/data/executive-orders-full-text.json'),
+        ]);
+
+        if (!metaResponse.ok) {
+          throw new Error(`Failed to load executive order metadata: ${metaResponse.status}`);
         }
-        const data = (await response.json()) as ExecutiveOrder[];
-        setOrders(data);
+        if (!fullTextResponse.ok) {
+          throw new Error(`Failed to load full-text coverage data: ${fullTextResponse.status}`);
+        }
+
+        const metaData = (await metaResponse.json()) as ExecutiveOrder[];
+        const fullData = await fullTextResponse.json();
+
+        setOrders(metaData);
+        setFullTextRecords(fullData);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
@@ -30,6 +42,10 @@ function App() {
 
   const normalizeSearchText = (value: string | number | undefined | null) => {
     return String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
+  };
+
+  const isMissingValue = (value: string | number | undefined | null) => {
+    return value === undefined || value === null || (typeof value === 'string' && value.trim() === '');
   };
 
   const normalizeEoNumber = (value: string | number | undefined | null) => {
@@ -129,6 +145,20 @@ function App() {
     });
   };
 
+  const coverageSummary = useMemo(() => {
+    const totalRecords = orders.length;
+    const fullTextAvailable = fullTextRecords.filter((record) => record.full_text_status === 'fetched').length;
+    const missingSource = fullTextRecords.filter((record) => record.full_text_status === 'missing_source').length;
+    const unknownEoCount = orders.filter((order) => isMissingValue(order.executive_order_number)).length;
+
+    return {
+      totalRecords,
+      fullTextAvailable,
+      missingSource,
+      unknownEoCount,
+    };
+  }, [orders, fullTextRecords]);
+
   const rankedOrders = useMemo(() => {
     const searchText = normalizeSearchText(search);
     if (!searchText) {
@@ -210,6 +240,86 @@ function App() {
           <h1>Executive Orders</h1>
           <p className="subtitle">
             Browse executive orders with basic metadata, PDF links, and Federal Register pages.
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: '0.75rem',
+              marginTop: '1rem',
+            }}
+          >
+            <div
+              style={{
+                padding: '0.9rem 1rem',
+                background: '#f9fafb',
+                border: '1px solid #e5e7eb',
+                borderRadius: '14px',
+              }}
+            >
+              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                Total records loaded
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {coverageSummary.totalRecords}
+              </div>
+            </div>
+            <div
+              style={{
+                padding: '0.9rem 1rem',
+                background: '#f9fafb',
+                border: '1px solid #e5e7eb',
+                borderRadius: '14px',
+              }}
+            >
+              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                Full-text available
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {coverageSummary.fullTextAvailable}
+              </div>
+            </div>
+            <div
+              style={{
+                padding: '0.9rem 1rem',
+                background: '#f9fafb',
+                border: '1px solid #e5e7eb',
+                borderRadius: '14px',
+              }}
+            >
+              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                Metadata-only / missing source
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {coverageSummary.missingSource}
+              </div>
+            </div>
+            <div
+              style={{
+                padding: '0.9rem 1rem',
+                background: '#f9fafb',
+                border: '1px solid #e5e7eb',
+                borderRadius: '14px',
+              }}
+            >
+              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
+                Unknown EO number
+              </div>
+              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
+                {coverageSummary.unknownEoCount}
+              </div>
+            </div>
+          </div>
+          <p
+            style={{
+              margin: '0.75rem 0 0',
+              color: '#4b5563',
+              maxWidth: '720px',
+              fontSize: '0.95rem',
+              lineHeight: 1.6,
+            }}
+          >
+            Some historical records are metadata-only because direct XML/JSON/HTML source links are unavailable. Some older records may only be accessible through scanned archival PDFs.
           </p>
         </div>
         <div className="search-group">
