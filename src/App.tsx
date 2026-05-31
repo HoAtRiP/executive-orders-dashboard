@@ -6,7 +6,9 @@ import './App.css';
 function App() {
   const [orders, setOrders] = useState<ExecutiveOrder[]>([]);
   const [fullTextRecords, setFullTextRecords] = useState<any[]>([]);
+  const [activeCoverageFilter, setActiveCoverageFilter] = useState<'all' | 'available' | 'missing_source' | 'unknown_eo'>('all');
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -39,6 +41,10 @@ function App() {
 
     load();
   }, []);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, activeCoverageFilter]);
 
   const normalizeSearchText = (value: string | number | undefined | null) => {
     return String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
@@ -135,6 +141,45 @@ function App() {
     return `${order.executive_order_number ?? ''}|${order.document_number ?? ''}|${order.signing_date ?? ''}|${order.publication_date ?? ''}`;
   };
 
+  const getCoverageKey = (record: { document_number?: string; executive_order_number?: string; signing_date?: string; publication_date?: string }) => {
+    if (record.document_number && String(record.document_number).trim() !== '') {
+      return `doc:${String(record.document_number).trim()}`;
+    }
+
+    return `eo:${normalizeEoNumber(record.executive_order_number)}|pub:${String(record.publication_date ?? '').trim()}|sign:${String(record.signing_date ?? '').trim()}`;
+  };
+
+  const coverageMap = useMemo(() => {
+    const map = new Map<string, any>();
+    fullTextRecords.forEach((record) => {
+      const key = getCoverageKey(record);
+      if (key) {
+        map.set(key, record);
+      }
+    });
+    return map;
+  }, [fullTextRecords]);
+
+  const matchesCoverageFilter = (order: ExecutiveOrder, filter: 'all' | 'available' | 'missing_source' | 'unknown_eo') => {
+    if (filter === 'all') return true;
+
+    if (filter === 'unknown_eo') {
+      return isMissingValue(order.executive_order_number);
+    }
+
+    const key = getCoverageKey(order);
+    const coverageRecord = coverageMap.get(key);
+    if (!coverageRecord) return false;
+
+    if (filter === 'available') {
+      return coverageRecord.full_text_status === 'fetched';
+    }
+    if (filter === 'missing_source') {
+      return coverageRecord.full_text_status === 'missing_source';
+    }
+    return false;
+  };
+
   const addUniqueOrders = (target: ExecutiveOrder[], source: ExecutiveOrder[], seen: Set<string>) => {
     source.forEach((order) => {
       const key = getOrderKey(order);
@@ -161,8 +206,9 @@ function App() {
 
   const rankedOrders = useMemo(() => {
     const searchText = normalizeSearchText(search);
+    const filteredOrders = sortedOrders.filter((order) => matchesCoverageFilter(order, activeCoverageFilter));
     if (!searchText) {
-      return sortedOrders;
+      return filteredOrders;
     }
 
     const hasPdf = (order: ExecutiveOrder) => Boolean(order.pdf_url);
@@ -170,11 +216,11 @@ function App() {
     const isPdfUnavailableSearch = searchText === 'no pdf' || searchText === 'unavailable' || searchText === 'pdf unavailable';
 
     if (isPdfAvailableSearch) {
-      return sortedOrders.filter(hasPdf);
+      return filteredOrders.filter(hasPdf);
     }
 
     if (isPdfUnavailableSearch) {
-      return sortedOrders.filter((order) => !hasPdf(order));
+      return filteredOrders.filter((order) => !hasPdf(order));
     }
 
     const searchEoNumber = extractExecutiveOrderNumber(searchText);
@@ -184,23 +230,23 @@ function App() {
     const containsText = (value: string | number | undefined | null) => normalizedValue(value).includes(searchText);
 
     const matchingEoNumber = searchEoNumber
-      ? sortedOrders.filter((order) => normalizeEoNumber(order.executive_order_number) === searchEoNumber)
+      ? filteredOrders.filter((order) => normalizeEoNumber(order.executive_order_number) === searchEoNumber)
       : [];
 
-    const tier1 = sortedOrders.filter((order) => exactMatch(order.executive_order_number));
-    const tier2 = sortedOrders.filter((order) => !exactMatch(order.executive_order_number) && startsWith(order.executive_order_number));
-    const tier3 = sortedOrders.filter((order) => exactMatch(order.president));
-    const tier4 = sortedOrders.filter(
+    const tier1 = filteredOrders.filter((order) => exactMatch(order.executive_order_number));
+    const tier2 = filteredOrders.filter((order) => !exactMatch(order.executive_order_number) && startsWith(order.executive_order_number));
+    const tier3 = filteredOrders.filter((order) => exactMatch(order.president));
+    const tier4 = filteredOrders.filter(
       (order) => !exactMatch(order.president) && (startsWith(order.president) || containsText(order.president))
     );
-    const tier5 = sortedOrders.filter((order) => exactMatch(order.title));
-    const tier6 = sortedOrders.filter(
+    const tier5 = filteredOrders.filter((order) => exactMatch(order.title));
+    const tier6 = filteredOrders.filter(
       (order) => !exactMatch(order.title) && (startsWith(order.title) || containsText(order.title))
     );
-    const tier7 = sortedOrders.filter(
+    const tier7 = filteredOrders.filter(
       (order) => exactMatch(order.citation) || exactMatch(order.document_number)
     );
-    const tier8 = sortedOrders.filter(
+    const tier8 = filteredOrders.filter(
       (order) =>
         exactMatch(order.signing_date) ||
         exactMatch(order.publication_date) ||
@@ -224,13 +270,19 @@ function App() {
     addUniqueOrders(combined, tier7, seen);
     addUniqueOrders(combined, tier8, seen);
 
-    const fuseResults = fuse.search(searchText).map((result) => result.item);
+    const fuseResults = fuse.search(searchText).map((result) => result.item).filter((order) => matchesCoverageFilter(order, activeCoverageFilter));
     addUniqueOrders(combined, fuseResults, seen);
 
     return combined;
-  }, [fuse, search, sortedOrders]);
+  }, [fuse, search, sortedOrders, activeCoverageFilter, coverageMap]);
 
-  const displayedOrders = rankedOrders.slice(0, 100);
+  const pageSize = 100;
+  const totalPages = Math.max(1, Math.ceil(rankedOrders.length / pageSize));
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, rankedOrders.length);
+  const displayedOrders = rankedOrders.slice(startIndex, endIndex);
+  const displayStart = rankedOrders.length > 0 ? startIndex + 1 : 0;
+  const displayEnd = endIndex;
 
   return (
     <div className="app-shell">
@@ -250,11 +302,14 @@ function App() {
             }}
           >
             <div
+              onClick={() => setActiveCoverageFilter('all')}
               style={{
                 padding: '0.9rem 1rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                background: activeCoverageFilter === 'all' ? '#e0efff' : '#f9fafb',
+                border: activeCoverageFilter === 'all' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
                 borderRadius: '14px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
               <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
@@ -265,11 +320,14 @@ function App() {
               </div>
             </div>
             <div
+              onClick={() => setActiveCoverageFilter('available')}
               style={{
                 padding: '0.9rem 1rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                background: activeCoverageFilter === 'available' ? '#e0efff' : '#f9fafb',
+                border: activeCoverageFilter === 'available' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
                 borderRadius: '14px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
               <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
@@ -280,11 +338,14 @@ function App() {
               </div>
             </div>
             <div
+              onClick={() => setActiveCoverageFilter('missing_source')}
               style={{
                 padding: '0.9rem 1rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                background: activeCoverageFilter === 'missing_source' ? '#e0efff' : '#f9fafb',
+                border: activeCoverageFilter === 'missing_source' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
                 borderRadius: '14px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
               <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
@@ -295,11 +356,14 @@ function App() {
               </div>
             </div>
             <div
+              onClick={() => setActiveCoverageFilter('unknown_eo')}
               style={{
                 padding: '0.9rem 1rem',
-                background: '#f9fafb',
-                border: '1px solid #e5e7eb',
+                background: activeCoverageFilter === 'unknown_eo' ? '#e0efff' : '#f9fafb',
+                border: activeCoverageFilter === 'unknown_eo' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
                 borderRadius: '14px',
+                cursor: 'pointer',
+                transition: 'background 0.2s ease, border-color 0.2s ease',
               }}
             >
               <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
@@ -331,6 +395,25 @@ function App() {
             placeholder="Search by number, title, president, citation, document number..."
           />
         </div>
+        {activeCoverageFilter !== 'all' ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#374151', fontSize: '0.95rem' }}>
+            <span>Active data filter: {activeCoverageFilter === 'available' ? 'Full-text available' : activeCoverageFilter === 'missing_source' ? 'Metadata-only / missing source' : 'Unknown EO number'}</span>
+            <button
+              type="button"
+              onClick={() => setActiveCoverageFilter('all')}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#2563eb',
+                cursor: 'pointer',
+                padding: 0,
+                textDecoration: 'underline',
+              }}
+            >
+              Clear filter
+            </button>
+          </div>
+        ) : null}
       </header>
 
       <main>
@@ -341,7 +424,9 @@ function App() {
         ) : (
           <div className="table-container">
             <div className="record-count">
-              Showing {displayedOrders.length} of {rankedOrders.length} matching records.
+              {rankedOrders.length > 0
+                ? `Showing ${displayStart}–${displayEnd} of ${rankedOrders.length} matching records.`
+                : 'No matching records found.'}
             </div>
             <table>
               <caption className="sr-only">Executive order records</caption>
@@ -419,6 +504,55 @@ function App() {
                 )}
               </tbody>
             </table>
+            {rankedOrders.length > 0 && totalPages > 1 ? (
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '1rem',
+                  padding: '1.5rem 1rem',
+                  borderTop: '1px solid #e5e7eb',
+                  background: '#f9fafb',
+                }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  style={{
+                    padding: '0.6rem 1rem',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    background: currentPage === 1 ? '#f3f4f6' : '#ffffff',
+                    color: currentPage === 1 ? '#9ca3af' : '#111827',
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  Previous
+                </button>
+                <span style={{ color: '#374151', fontSize: '0.95rem' }}>
+                  Page {currentPage} of {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    padding: '0.6rem 1rem',
+                    borderRadius: '8px',
+                    border: '1px solid #d1d5db',
+                    background: currentPage === totalPages ? '#f3f4f6' : '#ffffff',
+                    color: currentPage === totalPages ? '#9ca3af' : '#111827',
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    fontSize: '0.95rem',
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            ) : null}
           </div>
         )}
       </main>
