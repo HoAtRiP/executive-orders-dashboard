@@ -55,6 +55,22 @@ h1 {
   color: #374151;
 }
 
+.about-summary {
+  margin-top: 1rem;
+  max-width: 100%;
+}
+
+.about-summary__content {
+  margin-top: 0.675rem;
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.about-summary__content p {
+  margin: 0 0 0.45rem;
+}
+
 .search-group input,
 .search-group select {
   width: 100%;

@@ -12,6 +12,7 @@ function App() {
   const [activeTopic, setActiveTopic] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -560,17 +561,39 @@ function App() {
               </div>
             </div>
           </div>
-          <p
-            style={{
-              margin: '0.75rem 0 0',
-              color: '#4b5563',
-              maxWidth: '720px',
-              fontSize: '0.95rem',
-              lineHeight: 1.6,
-            }}
-          >
-            Some historical records are metadata-only because direct XML/JSON/HTML source links are unavailable. Some older records may only be accessible through scanned archival PDFs.
-          </p>
+          <div className="about-summary">
+            <button
+              type="button"
+              onClick={() => setAboutOpen((open) => !open)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: '#2563eb',
+                cursor: 'pointer',
+                padding: 0,
+                fontSize: '0.9rem',
+                textDecoration: 'underline',
+              }}
+            >
+              {aboutOpen ? 'Hide about this data' : 'About this data'}
+            </button>
+            {aboutOpen ? (
+              <div className="about-summary__content">
+                <p>
+                  The dashboard uses public executive order source data. Full-text available means searchable extracted text exists.
+                </p>
+                <p>
+                  Metadata-only / missing source means direct XML/JSON/HTML full-text links were unavailable. Some older historical records may only be accessible through scanned archival PDFs.
+                </p>
+                <p>
+                  Unknown EO number means the EO number field is missing and fallback metadata is used where available.
+                </p>
+                <p>
+                  Topic filters use curated keyword matching from metadata and available full text, not AI-generated classification.
+                </p>
+              </div>
+            ) : null}
+          </div>
         </div>
         <div className="search-group">
           <div className="search-row">
