@@ -11,6 +11,7 @@ function App() {
   const [search, setSearch] = useState('');
   const [activeTopic, setActiveTopic] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -48,6 +49,10 @@ function App() {
     setCurrentPage(1);
     setActiveTopic('all');
   }, [search, activeCoverageFilter]);
+
+  useEffect(() => {
+    setExpandedRows(new Set());
+  }, [search, activeTopic, activeCoverageFilter, currentPage]);
 
   const normalizeSearchText = (value: string | number | undefined | null) => {
     return String(value ?? '').trim().replace(/\s+/g, ' ').toLowerCase();
@@ -211,6 +216,78 @@ function App() {
     const coverageRecord = coverageMap.get(getCoverageKey(order));
     if (!coverageRecord || !coverageRecord.full_text_plain) return '';
     return String(coverageRecord.full_text_plain);
+  };
+
+  // This is a direct extracted text preview from available full text, not an AI-generated summary.
+  const getTextPreview = (order: ExecutiveOrder) => {
+    const rawFullText = getOrderFullTextPlain(order).trim();
+    if (!rawFullText) {
+      return 'Text preview unavailable; full text is not available in this dashboard.';
+    }
+
+    const fullText = rawFullText.replace(/\r/g, '');
+    const normalizedTitle = normalizeSearchText(order.title ?? '');
+
+    const splitParagraphs = fullText
+      .split(/\n{2,}/)
+      .map((paragraph) => paragraph.trim())
+      .filter(Boolean);
+
+    const extractSentences = (text: string): string[] => {
+      const matches = text.match(/[^.!?]+[.!?]+[\])'"`’”]*|[^.!?]+$/g);
+      return matches ? matches.map((sentence) => sentence.trim()).filter(Boolean) : [];
+    };
+
+    const isCitationFragment = (sentence: string) => {
+      const normalized = normalizeSearchText(sentence);
+      const citationPatterns = /(?:u\.s\.c\.|c\.f\.r\.|et seq\.|e\.o\.|\bsec\.?\b|\bsection\s+\d+\b|\bpub\. l\.\b|\bstat\.\b)/i;
+      if (normalized.length < 40 && citationPatterns.test(sentence)) return true;
+      if (/^[A-Z0-9 .,()\-]+$/.test(sentence) && citationPatterns.test(sentence) && normalized.length < 80) return true;
+      return false;
+    };
+
+    const isHeaderParagraph = (paragraph: string) => {
+      const trimmed = paragraph.trim();
+      const normalized = normalizeSearchText(trimmed);
+      if (/^title\s+\d+\s*[-–—]\s*the president\b/i.test(trimmed)) return true;
+      if (/^executive order\s*\d{1,5}.*\bof\b/i.test(trimmed)) return true;
+      if (normalizedTitle && normalized === normalizedTitle) return true;
+      if (normalizedTitle && normalized.includes(normalizedTitle) && trimmed.split(/\s+/).length <= 20) return true;
+      return false;
+    };
+
+    const chooseParagraph = () => {
+      const sectionParagraph = splitParagraphs.find((paragraph) => /section\s*1\b.*policy/i.test(paragraph));
+      if (sectionParagraph && !isCitationFragment(sectionParagraph)) return sectionParagraph;
+
+      const authorityParagraph = splitParagraphs.find((paragraph) => /by the authority vested in me/i.test(paragraph));
+      if (authorityParagraph && !isCitationFragment(authorityParagraph)) return authorityParagraph;
+
+      return splitParagraphs.find((paragraph) => !isHeaderParagraph(paragraph) && !isCitationFragment(paragraph)) || null;
+    };
+
+    const paragraph = chooseParagraph();
+    if (!paragraph) {
+      return 'Text preview unavailable from extracted text.';
+    }
+
+    const sentences = extractSentences(paragraph).filter((sentence) => !isCitationFragment(sentence));
+    const usefulSentences: string[] = [];
+
+    for (const sentence of sentences) {
+      if (!sentence) continue;
+      if (usefulSentences.length === 0 && isHeaderParagraph(sentence)) {
+        continue;
+      }
+      usefulSentences.push(sentence);
+      if (usefulSentences.length >= 3) break;
+    }
+
+    if (usefulSentences.length === 0) {
+      return 'Text preview unavailable from extracted text.';
+    }
+
+    return usefulSentences.join(' ');
   };
 
   // Phase 1 topic filtering uses curated keyword matching rather than AI semantic classification.
@@ -573,10 +650,35 @@ function App() {
                       ? order.document_number
                       : `${order.executive_order_number ?? ''}|${order.publication_date ?? ''}|${order.signing_date ?? ''}|${index}`;
 
+                    const isExpanded = expandedRows.has(rowKey);
                     return (
                       <tr key={rowKey}>
                         <td>{order.executive_order_number}</td>
-                        <td>{order.title}</td>
+                        <td>
+                          <div>{order.title}</div>
+                          <button
+                            type="button"
+                            className="preview-toggle"
+                            onClick={() => {
+                              setExpandedRows((current) => {
+                                const next = new Set(current);
+                                if (next.has(rowKey)) {
+                                  next.delete(rowKey);
+                                } else {
+                                  next.add(rowKey);
+                                }
+                                return next;
+                              });
+                            }}
+                          >
+                            {isExpanded ? 'Hide text preview' : 'Show text preview'}
+                          </button>
+                          {isExpanded ? (
+                            <div className="title-preview">
+                              {getTextPreview(order)}
+                            </div>
+                          ) : null}
+                        </td>
                         <td>{order.president}</td>
                         <td>{order.signing_date}</td>
                         <td>{order.publication_date}</td>
