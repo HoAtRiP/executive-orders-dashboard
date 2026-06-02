@@ -90,6 +90,16 @@ tbody td {
   gap: 0.5rem;
 }
 
+.no-sources {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.4rem 0.7rem;
+  border-radius: 999px;
+  background: #f3f4f6;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
 .button {
   display: inline-flex;
   align-items: center;

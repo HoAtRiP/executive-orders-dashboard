@@ -438,8 +438,7 @@ function App() {
                   <th>Signing date</th>
                   <th>Publication date</th>
                   <th>Citation</th>
-                  <th>PDF</th>
-                  <th>Links</th>
+                  <th>Sources</th>
                 </tr>
               </thead>
               <tbody>
@@ -463,7 +462,6 @@ function App() {
                         <td>{order.signing_date}</td>
                         <td>{order.publication_date}</td>
                         <td>{order.citation}</td>
-                        <td>{order.pdf_url ? 'Available' : 'PDF unavailable'}</td>
                         <td className="actions-cell">
                           {order.pdf_url ? (
                             <a
@@ -496,6 +494,9 @@ function App() {
                             >
                               Open Source JSON
                             </a>
+                          ) : null}
+                          {!order.pdf_url && !order.html_url && !order.json_url ? (
+                            <span className="no-sources">No sources available</span>
                           ) : null}
                         </td>
                       </tr>
