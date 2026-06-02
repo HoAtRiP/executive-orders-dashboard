@@ -450,6 +450,26 @@ function App() {
   const displayStart = topicFilteredOrders.length > 0 ? startIndex + 1 : 0;
   const displayEnd = endIndex;
 
+  const getFiltersSummary = () => {
+    const phrases: string[] = [];
+    if (search.trim()) {
+      phrases.push(`for “${search.trim()}”`);
+    }
+    if (activeTopic !== 'all' && topicOptions.length > 0) {
+      phrases.push(`narrowed by topic “${activeTopic}”`);
+    }
+    if (activeCoverageFilter !== 'all') {
+      const filterLabel =
+        activeCoverageFilter === 'available'
+          ? 'Full-text available'
+          : activeCoverageFilter === 'missing_source'
+          ? 'Metadata-only / missing source'
+          : 'Unknown EO number';
+      phrases.push(`in ${filterLabel}`);
+    }
+    return phrases.length ? ` ${phrases.join(' ')}` : '';
+  };
+
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -620,8 +640,8 @@ function App() {
         ) : (
           <div className="table-container">
             <div className="record-count">
-              {rankedOrders.length > 0
-                ? `Showing ${displayStart}–${displayEnd} of ${topicFilteredOrders.length} matching records.`
+              {topicFilteredOrders.length > 0
+                ? `Showing ${displayStart}–${displayEnd} of ${topicFilteredOrders.length} matching records.${getFiltersSummary()}`
                 : 'No matching records found.'}
             </div>
             <table>
