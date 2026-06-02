@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import Fuse from 'fuse.js';
 import type { ExecutiveOrder } from './types';
+import { topics, topicKeywords } from './topicFilters';
 import './App.css';
 
 function App() {
@@ -8,6 +9,7 @@ function App() {
   const [fullTextRecords, setFullTextRecords] = useState<any[]>([]);
   const [activeCoverageFilter, setActiveCoverageFilter] = useState<'all' | 'available' | 'missing_source' | 'unknown_eo'>('all');
   const [search, setSearch] = useState('');
+  const [activeTopic, setActiveTopic] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -44,6 +46,7 @@ function App() {
 
   useEffect(() => {
     setCurrentPage(1);
+    setActiveTopic('all');
   }, [search, activeCoverageFilter]);
 
   const normalizeSearchText = (value: string | number | undefined | null) => {
@@ -204,6 +207,37 @@ function App() {
     };
   }, [orders, fullTextRecords]);
 
+  const getOrderFullTextPlain = (order: ExecutiveOrder) => {
+    const coverageRecord = coverageMap.get(getCoverageKey(order));
+    if (!coverageRecord || !coverageRecord.full_text_plain) return '';
+    return String(coverageRecord.full_text_plain);
+  };
+
+  // Phase 1 topic filtering uses curated keyword matching rather than AI semantic classification.
+  const matchesTopic = (order: ExecutiveOrder, topic: string) => {
+    if (topic === 'all') return true;
+    const keywords = topicKeywords[topic];
+    if (!keywords) return true;
+
+    const textValues = [
+      order.executive_order_number,
+      order.title,
+      order.president,
+      order.citation,
+      order.document_number,
+      order.disposition_notes,
+      order.signing_date,
+      order.publication_date,
+      order.year,
+      getOrderFullTextPlain(order),
+    ]
+      .filter((value): value is string | number => value !== undefined && value !== null)
+      .join(' ');
+
+    const normalizedText = normalizeSearchText(textValues);
+    return keywords.some((keyword) => normalizedText.includes(normalizeSearchText(keyword)));
+  };
+
   const rankedOrders = useMemo(() => {
     const searchText = normalizeSearchText(search);
     const filteredOrders = sortedOrders.filter((order) => matchesCoverageFilter(order, activeCoverageFilter));
@@ -227,11 +261,30 @@ function App() {
     const normalizedValue = (value: string | number | undefined | null) => normalizeSearchText(value);
     const exactMatch = (value: string | number | undefined | null) => normalizedValue(value) === searchText;
     const startsWith = (value: string | number | undefined | null) => normalizedValue(value).startsWith(searchText);
-    const containsText = (value: string | number | undefined | null) => normalizeSearchText(value).includes(searchText);
-    const getOrderFullTextPlain = (order: ExecutiveOrder) => {
-      const coverageRecord = coverageMap.get(getCoverageKey(order));
-      if (!coverageRecord || !coverageRecord.full_text_plain) return '';
-      return String(coverageRecord.full_text_plain);
+
+    const acronymAliases: Record<string, string[]> = {
+      fema: ['fema', 'federal emergency management agency', 'emergency management', 'disaster', 'stafford act'],
+    };
+    const knownAcronyms = new Set(['fema', 'omb', 'opm', 'dhs', 'doj', 'cisa', 'hhs', 'dod', 'dos']);
+    const isShortAcronymQuery = (raw: string) => {
+      const normalizedRaw = String(raw ?? '').trim();
+      return knownAcronyms.has(normalizedRaw.toLowerCase()) && /^[A-Za-z]{2,4}$/.test(normalizedRaw);
+    };
+    const escapeRegExp = (value: string) => value.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+    const acronymTerms = isShortAcronymQuery(search) ? acronymAliases[searchText] ?? [searchText] : undefined;
+
+    const matchesSearchText = (value: string | number | undefined | null) => {
+      const normalized = normalizeSearchText(value);
+      if (normalized === '') return false;
+      if (acronymTerms) {
+        return acronymTerms.some((term) => {
+          const normalizedTerm = normalizeSearchText(term);
+          if (normalizedTerm === '') return false;
+          const regex = new RegExp(`\\b${escapeRegExp(normalizedTerm)}\\b`);
+          return regex.test(normalized);
+        });
+      }
+      return normalized.includes(searchText);
     };
 
     const matchingEoNumber = searchEoNumber
@@ -242,11 +295,11 @@ function App() {
     const tier2 = filteredOrders.filter((order) => !exactMatch(order.executive_order_number) && startsWith(order.executive_order_number));
     const tier3 = filteredOrders.filter((order) => exactMatch(order.president));
     const tier4 = filteredOrders.filter(
-      (order) => !exactMatch(order.president) && (startsWith(order.president) || containsText(order.president))
+      (order) => !exactMatch(order.president) && (startsWith(order.president) || matchesSearchText(order.president))
     );
     const tier5 = filteredOrders.filter((order) => exactMatch(order.title));
     const tier6 = filteredOrders.filter(
-      (order) => !exactMatch(order.title) && (startsWith(order.title) || containsText(order.title))
+      (order) => !exactMatch(order.title) && (startsWith(order.title) || matchesSearchText(order.title))
     );
     const tier7 = filteredOrders.filter(
       (order) => exactMatch(order.citation) || exactMatch(order.document_number)
@@ -261,7 +314,7 @@ function App() {
     );
     const tier9 = filteredOrders.filter((order) => {
       const fullTextPlain = getOrderFullTextPlain(order);
-      return fullTextPlain ? containsText(fullTextPlain) : false;
+      return fullTextPlain ? matchesSearchText(fullTextPlain) : false;
     });
 
     const combined: ExecutiveOrder[] = [];
@@ -280,18 +333,44 @@ function App() {
     addUniqueOrders(combined, tier8, seen);
     addUniqueOrders(combined, tier9, seen);
 
-    const fuseResults = fuse.search(searchText).map((result) => result.item).filter((order) => matchesCoverageFilter(order, activeCoverageFilter));
+    let fuseResults = fuse.search(searchText).map((result) => result.item).filter((order) => matchesCoverageFilter(order, activeCoverageFilter));
+    if (acronymTerms) {
+      fuseResults = fuseResults.filter((order) => {
+        const searchable = [
+          order.executive_order_number,
+          order.title,
+          order.president,
+          order.citation,
+          order.document_number,
+          order.disposition_notes,
+          order.signing_date,
+          order.publication_date,
+          order.year,
+          getOrderFullTextPlain(order),
+        ].some(matchesSearchText);
+        return searchable;
+      });
+    }
     addUniqueOrders(combined, fuseResults, seen);
 
     return combined;
   }, [fuse, search, sortedOrders, activeCoverageFilter, coverageMap]);
 
+  const topicOptions = useMemo(() => {
+    return topics.filter((topic) => rankedOrders.some((order) => matchesTopic(order, topic)));
+  }, [rankedOrders]);
+
+  const topicFilteredOrders = useMemo(() => {
+    if (activeTopic === 'all' || topicOptions.length === 0) return rankedOrders;
+    return rankedOrders.filter((order) => matchesTopic(order, activeTopic));
+  }, [rankedOrders, activeTopic, topicOptions.length]);
+
   const pageSize = 100;
-  const totalPages = Math.max(1, Math.ceil(rankedOrders.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(topicFilteredOrders.length / pageSize));
   const startIndex = (currentPage - 1) * pageSize;
-  const endIndex = Math.min(startIndex + pageSize, rankedOrders.length);
-  const displayedOrders = rankedOrders.slice(startIndex, endIndex);
-  const displayStart = rankedOrders.length > 0 ? startIndex + 1 : 0;
+  const endIndex = Math.min(startIndex + pageSize, topicFilteredOrders.length);
+  const displayedOrders = topicFilteredOrders.slice(startIndex, endIndex);
+  const displayStart = topicFilteredOrders.length > 0 ? startIndex + 1 : 0;
   const displayEnd = endIndex;
 
   return (
@@ -397,13 +476,42 @@ function App() {
           </p>
         </div>
         <div className="search-group">
-          <label htmlFor="search">Search executive orders</label>
-          <input
-            id="search"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-            placeholder="Search by number, title, president, citation, document number..."
-          />
+          <div className="search-row">
+            <div className="search-field">
+              <label htmlFor="search">Search executive orders</label>
+              <input
+                id="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Search by number, title, president, citation, document number..."
+              />
+            </div>
+            <div className="topic-field">
+              <label htmlFor="topic-filter">Narrow by topic</label>
+              <select
+                id="topic-filter"
+                value={activeTopic}
+                disabled={topicOptions.length === 0}
+                onChange={(event) => {
+                  setActiveTopic(event.target.value);
+                  setCurrentPage(1);
+                }}
+              >
+                {topicOptions.length > 0 ? (
+                  <>
+                    <option value="all">All topics</option>
+                    {topicOptions.map((topic) => (
+                      <option key={topic} value={topic}>
+                        {topic}
+                      </option>
+                    ))}
+                  </>
+                ) : (
+                  <option value="all">No topic filters available</option>
+                )}
+              </select>
+            </div>
+          </div>
           <p className="search-note">Search includes metadata and available full text.</p>
         </div>
         {activeCoverageFilter !== 'all' ? (
@@ -436,7 +544,7 @@ function App() {
           <div className="table-container">
             <div className="record-count">
               {rankedOrders.length > 0
-                ? `Showing ${displayStart}–${displayEnd} of ${rankedOrders.length} matching records.`
+                ? `Showing ${displayStart}–${displayEnd} of ${topicFilteredOrders.length} matching records.`
                 : 'No matching records found.'}
             </div>
             <table>

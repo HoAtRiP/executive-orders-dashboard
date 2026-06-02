@@ -33,8 +33,21 @@ h1 {
 
 .search-group {
   display: grid;
+  gap: 0.75rem;
+  max-width: 100%;
+}
+
+.search-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.search-field,
+.topic-field {
+  display: grid;
   gap: 0.5rem;
-  max-width: 520px;
 }
 
 .search-group label {
@@ -42,8 +55,10 @@ h1 {
   color: #374151;
 }
 
-.search-group input {
+.search-group input,
+.search-group select {
   width: 100%;
+  min-height: 44px;
   padding: 0.85rem 1rem;
   border: 1px solid #d1d5db;
   background: white;
