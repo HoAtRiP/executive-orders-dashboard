@@ -50,6 +50,12 @@ h1 {
   color: #111827;
 }
 
+.search-note {
+  margin: 0.45rem 0 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
 .table-container {
   overflow-x: auto;
   background: white;

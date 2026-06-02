@@ -227,7 +227,12 @@ function App() {
     const normalizedValue = (value: string | number | undefined | null) => normalizeSearchText(value);
     const exactMatch = (value: string | number | undefined | null) => normalizedValue(value) === searchText;
     const startsWith = (value: string | number | undefined | null) => normalizedValue(value).startsWith(searchText);
-    const containsText = (value: string | number | undefined | null) => normalizedValue(value).includes(searchText);
+    const containsText = (value: string | number | undefined | null) => normalizeSearchText(value).includes(searchText);
+    const getOrderFullTextPlain = (order: ExecutiveOrder) => {
+      const coverageRecord = coverageMap.get(getCoverageKey(order));
+      if (!coverageRecord || !coverageRecord.full_text_plain) return '';
+      return String(coverageRecord.full_text_plain);
+    };
 
     const matchingEoNumber = searchEoNumber
       ? filteredOrders.filter((order) => normalizeEoNumber(order.executive_order_number) === searchEoNumber)
@@ -254,6 +259,10 @@ function App() {
         exactMatch(order.start_page) ||
         exactMatch(order.end_page)
     );
+    const tier9 = filteredOrders.filter((order) => {
+      const fullTextPlain = getOrderFullTextPlain(order);
+      return fullTextPlain ? containsText(fullTextPlain) : false;
+    });
 
     const combined: ExecutiveOrder[] = [];
     const seen = new Set<string>();
@@ -269,6 +278,7 @@ function App() {
     addUniqueOrders(combined, tier6, seen);
     addUniqueOrders(combined, tier7, seen);
     addUniqueOrders(combined, tier8, seen);
+    addUniqueOrders(combined, tier9, seen);
 
     const fuseResults = fuse.search(searchText).map((result) => result.item).filter((order) => matchesCoverageFilter(order, activeCoverageFilter));
     addUniqueOrders(combined, fuseResults, seen);
@@ -394,6 +404,7 @@ function App() {
             onChange={(event) => setSearch(event.target.value)}
             placeholder="Search by number, title, president, citation, document number..."
           />
+          <p className="search-note">Search includes metadata and available full text.</p>
         </div>
         {activeCoverageFilter !== 'all' ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', color: '#374151', fontSize: '0.95rem' }}>
