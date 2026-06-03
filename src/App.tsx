@@ -199,6 +199,8 @@ function App() {
     });
   };
 
+  const formatNumber = (value: number) => value.toLocaleString('en-US');
+
   const coverageSummary = useMemo(() => {
     const totalRecords = orders.length;
     const fullTextAvailable = fullTextRecords.filter((record) => record.full_text_status === 'fetched').length;
@@ -210,6 +212,7 @@ function App() {
       fullTextAvailable,
       missingSource,
       unknownEoCount,
+      formatNumber,
     };
   }, [orders, fullTextRecords]);
 
@@ -488,29 +491,37 @@ function App() {
               className={`coverage-card ${activeCoverageFilter === 'all' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('all')}
             >
-              <div className="coverage-card__label">Total records loaded</div>
-              <div className="coverage-card__value">{coverageSummary.totalRecords}</div>
+              <div>
+                <div className="coverage-card__label">Total records loaded</div>
+                <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.totalRecords)}</div>
+              </div>
             </div>
             <div
               className={`coverage-card ${activeCoverageFilter === 'available' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('available')}
             >
-              <div className="coverage-card__label">Full-text available</div>
-              <div className="coverage-card__value">{coverageSummary.fullTextAvailable}</div>
+              <div>
+                <div className="coverage-card__label">Full-text available</div>
+                <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.fullTextAvailable)}</div>
+              </div>
             </div>
             <div
               className={`coverage-card ${activeCoverageFilter === 'missing_source' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('missing_source')}
             >
-              <div className="coverage-card__label">Metadata-only / missing source</div>
-              <div className="coverage-card__value">{coverageSummary.missingSource}</div>
+              <div>
+                <div className="coverage-card__label">Metadata-only / missing source</div>
+                <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.missingSource)}</div>
+              </div>
             </div>
             <div
               className={`coverage-card ${activeCoverageFilter === 'unknown_eo' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('unknown_eo')}
             >
-              <div className="coverage-card__label">Unknown EO number</div>
-              <div className="coverage-card__value">{coverageSummary.unknownEoCount}</div>
+              <div>
+                <div className="coverage-card__label">Unknown EO number</div>
+                <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.unknownEoCount)}</div>
+              </div>
             </div>
           </div>
           <div className={`about-summary ${aboutOpen ? 'about-summary--expanded' : ''}`}>
@@ -618,8 +629,8 @@ function App() {
                   <th>EO #</th>
                   <th>Title</th>
                   <th>President</th>
-                  <th>Signing date</th>
-                  <th>Publication date</th>
+                  <th>Signed</th>
+                  <th>Published</th>
                   <th>Citation</th>
                   <th>Sources</th>
                 </tr>
@@ -641,11 +652,11 @@ function App() {
                     return (
                       <tr key={rowKey}>
                         <td>{order.executive_order_number}</td>
-                        <td>
-                          <div>{order.title}</div>
+                        <td className="title-cell">
+                          <div className="title-cell__text">{order.title}</div>
                           <button
                             type="button"
-                            className="preview-toggle"
+                            className={`preview-toggle ${isExpanded ? 'preview-toggle--active' : ''}`}
                             onClick={() => {
                               setExpandedRows((current) => {
                                 const next = new Set(current);
@@ -666,14 +677,14 @@ function App() {
                             </div>
                           ) : null}
                         </td>
-                        <td>{order.president}</td>
-                        <td>{order.signing_date}</td>
-                        <td>{order.publication_date}</td>
-                        <td>{order.citation}</td>
+                        <td className="nowrap-cell">{order.president}</td>
+                        <td className="nowrap-cell">{order.signing_date}</td>
+                        <td className="nowrap-cell">{order.publication_date}</td>
+                        <td className="nowrap-cell">{order.citation}</td>
                         <td className="actions-cell">
                           {order.pdf_url ? (
                             <a
-                              className="button"
+                              className="button button--pdf"
                               href={order.pdf_url}
                               target="_blank"
                               rel="noreferrer"
@@ -685,7 +696,7 @@ function App() {
                           )}
                           {order.html_url ? (
                             <a
-                              className="button secondary"
+                              className="button secondary button--external"
                               href={order.html_url}
                               target="_blank"
                               rel="noreferrer"
@@ -695,7 +706,7 @@ function App() {
                           ) : null}
                           {order.json_url ? (
                             <a
-                              className="button secondary"
+                              className="button secondary button--code"
                               href={order.json_url}
                               target="_blank"
                               rel="noreferrer"
@@ -714,49 +725,21 @@ function App() {
               </tbody>
             </table>
             {rankedOrders.length > 0 && totalPages > 1 ? (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '1rem',
-                  padding: '1.5rem 1rem',
-                  borderTop: '1px solid #e5e7eb',
-                  background: '#f9fafb',
-                }}
-              >
+              <div className="pagination-controls">
                 <button
                   type="button"
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
-                  style={{
-                    padding: '0.6rem 1rem',
-                    borderRadius: '8px',
-                    border: '1px solid #d1d5db',
-                    background: currentPage === 1 ? '#f3f4f6' : '#ffffff',
-                    color: currentPage === 1 ? '#9ca3af' : '#111827',
-                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                    fontSize: '0.95rem',
-                  }}
+                  className="pagination-button"
                 >
                   Previous
                 </button>
-                <span style={{ color: '#374151', fontSize: '0.95rem' }}>
-                  Page {currentPage} of {totalPages}
-                </span>
+                <span className="pagination-info">Page {currentPage} of {totalPages}</span>
                 <button
                   type="button"
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
-                  style={{
-                    padding: '0.6rem 1rem',
-                    borderRadius: '8px',
-                    border: '1px solid #d1d5db',
-                    background: currentPage === totalPages ? '#f3f4f6' : '#ffffff',
-                    color: currentPage === totalPages ? '#9ca3af' : '#111827',
-                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                    fontSize: '0.95rem',
-                  }}
+                  className="pagination-button"
                 >
                   Next
                 </button>
