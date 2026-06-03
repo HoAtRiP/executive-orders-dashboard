@@ -365,9 +365,15 @@ function App() {
       return normalized.includes(searchText);
     };
 
-    const matchingEoNumber = searchEoNumber
-      ? filteredOrders.filter((order) => normalizeEoNumber(order.executive_order_number) === searchEoNumber)
-      : [];
+    if (searchEoNumber) {
+      const exactEoMatches = filteredOrders.filter(
+        (order) => normalizeEoNumber(order.executive_order_number) === searchEoNumber
+      );
+      if (exactEoMatches.length > 0) {
+        return exactEoMatches;
+      }
+      return [];
+    }
 
     const tier1 = filteredOrders.filter((order) => exactMatch(order.executive_order_number));
     const tier2 = filteredOrders.filter((order) => !exactMatch(order.executive_order_number) && startsWith(order.executive_order_number));
@@ -398,9 +404,6 @@ function App() {
     const combined: ExecutiveOrder[] = [];
     const seen = new Set<string>();
 
-    if (searchEoNumber) {
-      addUniqueOrders(combined, matchingEoNumber, seen);
-    }
     addUniqueOrders(combined, tier1, seen);
     addUniqueOrders(combined, tier2, seen);
     addUniqueOrders(combined, tier3, seen);
