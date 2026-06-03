@@ -480,100 +480,41 @@ function App() {
           <p className="subtitle">
             Browse executive orders with basic metadata, PDF links, and Federal Register pages.
           </p>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: '0.75rem',
-              marginTop: '1rem',
-            }}
-          >
+          <div className="coverage-cards">
             <div
+              className={`coverage-card ${activeCoverageFilter === 'all' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('all')}
-              style={{
-                padding: '0.9rem 1rem',
-                background: activeCoverageFilter === 'all' ? '#e0efff' : '#f9fafb',
-                border: activeCoverageFilter === 'all' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
-                borderRadius: '14px',
-                cursor: 'pointer',
-                transition: 'background 0.2s ease, border-color 0.2s ease',
-              }}
             >
-              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
-                Total records loaded
-              </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
-                {coverageSummary.totalRecords}
-              </div>
+              <div className="coverage-card__label">Total records loaded</div>
+              <div className="coverage-card__value">{coverageSummary.totalRecords}</div>
             </div>
             <div
+              className={`coverage-card ${activeCoverageFilter === 'available' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('available')}
-              style={{
-                padding: '0.9rem 1rem',
-                background: activeCoverageFilter === 'available' ? '#e0efff' : '#f9fafb',
-                border: activeCoverageFilter === 'available' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
-                borderRadius: '14px',
-                cursor: 'pointer',
-                transition: 'background 0.2s ease, border-color 0.2s ease',
-              }}
             >
-              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
-                Full-text available
-              </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
-                {coverageSummary.fullTextAvailable}
-              </div>
+              <div className="coverage-card__label">Full-text available</div>
+              <div className="coverage-card__value">{coverageSummary.fullTextAvailable}</div>
             </div>
             <div
+              className={`coverage-card ${activeCoverageFilter === 'missing_source' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('missing_source')}
-              style={{
-                padding: '0.9rem 1rem',
-                background: activeCoverageFilter === 'missing_source' ? '#e0efff' : '#f9fafb',
-                border: activeCoverageFilter === 'missing_source' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
-                borderRadius: '14px',
-                cursor: 'pointer',
-                transition: 'background 0.2s ease, border-color 0.2s ease',
-              }}
             >
-              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
-                Metadata-only / missing source
-              </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
-                {coverageSummary.missingSource}
-              </div>
+              <div className="coverage-card__label">Metadata-only / missing source</div>
+              <div className="coverage-card__value">{coverageSummary.missingSource}</div>
             </div>
             <div
+              className={`coverage-card ${activeCoverageFilter === 'unknown_eo' ? 'active' : ''}`}
               onClick={() => setActiveCoverageFilter('unknown_eo')}
-              style={{
-                padding: '0.9rem 1rem',
-                background: activeCoverageFilter === 'unknown_eo' ? '#e0efff' : '#f9fafb',
-                border: activeCoverageFilter === 'unknown_eo' ? '1px solid #93c5fd' : '1px solid #e5e7eb',
-                borderRadius: '14px',
-                cursor: 'pointer',
-                transition: 'background 0.2s ease, border-color 0.2s ease',
-              }}
             >
-              <div style={{ color: '#4b5563', fontSize: '0.8rem', marginBottom: '0.35rem' }}>
-                Unknown EO number
-              </div>
-              <div style={{ fontSize: '1.25rem', fontWeight: 700, color: '#111827' }}>
-                {coverageSummary.unknownEoCount}
-              </div>
+              <div className="coverage-card__label">Unknown EO number</div>
+              <div className="coverage-card__value">{coverageSummary.unknownEoCount}</div>
             </div>
           </div>
-          <div className="about-summary">
+          <div className={`about-summary ${aboutOpen ? 'about-summary--expanded' : ''}`}>
             <button
               type="button"
               onClick={() => setAboutOpen((open) => !open)}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                color: '#2563eb',
-                cursor: 'pointer',
-                padding: 0,
-                fontSize: '0.9rem',
-                textDecoration: 'underline',
-              }}
+              className="about-summary__toggle"
             >
               {aboutOpen ? 'Hide about this data' : 'About this data'}
             </button>
