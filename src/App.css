@@ -91,27 +91,31 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #64748b;
-  font-size: 1.2rem;
-  line-height: 1;
-  min-width: 1.6rem;
-  min-height: 1.6rem;
+  color: #475569;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  flex-shrink: 0;
+}
+
+.coverage-card__icon svg {
+  width: 28px;
+  height: 28px;
 }
 
 .coverage-card__icon::after {
-  display: inline-block;
+  display: none;
 }
 
 .coverage-card__icon--records::after {
-  content: '≡';
+  display: none;
 }
 
 .coverage-card__icon--document::after {
-  content: '▭';
+  display: none;
 }
 
 .coverage-card__icon--question::after {
-  content: '?';
+  display: none;
 }
 
 .coverage-card__icon--warning::after {
@@ -430,7 +434,7 @@ tbody td:first-child {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.3rem;
+  gap: 0.4rem;
   padding: 0.35rem 0.65rem;
   border-radius: 12px;
   border: 1px solid transparent;
@@ -440,28 +444,32 @@ tbody td:first-child {
   font-size: 0.82rem;
 }
 
+.button svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 .button.secondary {
   background: #f8fafc;
   border-color: #d9e2ec;
   color: #0f172a;
 }
 
+.button.secondary svg {
+  color: #0f172a;
+}
+
 .button--pdf::before {
-  content: 'PDF';
-  font-size: 0.66rem;
-  padding: 0.12rem 0.3rem;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.16);
+  display: none;
 }
 
 .button--external::before {
-  content: '↗';
-  font-size: 0.8rem;
+  display: none;
 }
 
 .button--code::before {
-  content: '</>';
-  font-size: 0.72rem;
+  display: none;
 }
 
 .about-summary {

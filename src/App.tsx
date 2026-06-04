@@ -476,7 +476,60 @@ function App() {
     }
     return phrases.length ? ` ${phrases.join(' ')}` : '';
   };
+  const StackedDocumentsIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 2 1 7l11 5 11-5-11-5z" />
+      <path d="M2 12l10 5 10-5" />
+      <path d="M2 17l10 5 10-5" />
+    </svg>
+  );
 
+  const DocumentIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+      <polyline points="14 2 14 8 20 8" />
+      <line x1="9" y1="12" x2="15" y2="12" />
+      <line x1="9" y1="16" x2="15" y2="16" />
+    </svg>
+  );
+
+  const QuestionCircleIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <path d="M9.09 9a3 3 0 0 1 5.82 1c0 1.5-2 1.5-2 3" />
+      <path d="M12 17h.01" />
+    </svg>
+  );
+
+  const ExclamationTriangleIcon = () => (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3.05h16.94a2 2 0 0 0 1.71-3.05l-8.47-14.14a2 2 0 0 0-3.42 0z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
+  );
+
+  const DocumentPdfIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
+      <polyline points="13 2 13 9 20 9" />
+    </svg>
+  );
+
+  const ExternalLinkIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+      <polyline points="15 3 21 3 21 9" />
+      <line x1="10" y1="14" x2="21" y2="3" />
+    </svg>
+  );
+
+  const CodeIcon = () => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="16 18 22 12 16 6" />
+      <polyline points="8 6 2 12 8 18" />
+    </svg>
+  );
   return (
     <div className="app-shell">
       <header className="app-header">
@@ -495,6 +548,7 @@ function App() {
                 <div className="coverage-card__label">Total records loaded</div>
                 <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.totalRecords)}</div>
               </div>
+              <div className="coverage-card__icon"><StackedDocumentsIcon /></div>
             </div>
             <div
               className={`coverage-card ${activeCoverageFilter === 'available' ? 'active' : ''}`}
@@ -504,6 +558,7 @@ function App() {
                 <div className="coverage-card__label">Full-text available</div>
                 <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.fullTextAvailable)}</div>
               </div>
+              <div className="coverage-card__icon"><DocumentIcon /></div>
             </div>
             <div
               className={`coverage-card ${activeCoverageFilter === 'missing_source' ? 'active' : ''}`}
@@ -513,6 +568,7 @@ function App() {
                 <div className="coverage-card__label">Metadata-only / missing source</div>
                 <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.missingSource)}</div>
               </div>
+              <div className="coverage-card__icon"><QuestionCircleIcon /></div>
             </div>
             <div
               className={`coverage-card ${activeCoverageFilter === 'unknown_eo' ? 'active' : ''}`}
@@ -522,6 +578,7 @@ function App() {
                 <div className="coverage-card__label">Unknown EO number</div>
                 <div className="coverage-card__value">{coverageSummary.formatNumber(coverageSummary.unknownEoCount)}</div>
               </div>
+              <div className="coverage-card__icon"><ExclamationTriangleIcon /></div>
             </div>
           </div>
           <div className={`about-summary ${aboutOpen ? 'about-summary--expanded' : ''}`}>
@@ -689,6 +746,7 @@ function App() {
                               target="_blank"
                               rel="noreferrer"
                             >
+                              <DocumentPdfIcon />
                               Download PDF
                             </a>
                           ) : (
@@ -701,6 +759,7 @@ function App() {
                               target="_blank"
                               rel="noreferrer"
                             >
+                              <ExternalLinkIcon />
                               Open Federal Register Page
                             </a>
                           ) : null}
@@ -711,6 +770,7 @@ function App() {
                               target="_blank"
                               rel="noreferrer"
                             >
+                              <CodeIcon />
                               Open Source JSON
                             </a>
                           ) : null}
