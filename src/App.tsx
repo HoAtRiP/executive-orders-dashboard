@@ -20,8 +20,8 @@ function App() {
     const load = async () => {
       try {
         const [metaResponse, fullTextResponse] = await Promise.all([
-          fetch('/data/executive-orders.json'),
-          fetch('/data/executive-orders-full-text.json'),
+          fetch(`${import.meta.env.BASE_URL}data/executive-orders.json`),
+          fetch(`${import.meta.env.BASE_URL}data/executive-orders-full-text.json`),
         ]);
 
         if (!metaResponse.ok) {
