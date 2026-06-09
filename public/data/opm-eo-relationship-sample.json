@@ -1,0 +1,387 @@
+[
+  {
+    "opm_title": "Executive Order Implementing Schedule Policy/Career in the Excepted Service",
+    "opm_date": "Monday, June 08, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, U.S. Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/opm-memo-re-executive-order-implementing-schedule-policycareer-in-the-excepted-service.pdf",
+    "detected_eo_numbers": [
+      "13957"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "13957",
+        "title": "Creating Schedule F in the Excepted Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2020-10-21",
+        "publication_date": "2020-10-26",
+        "citation": "85 FR 67631",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2020-10-26/pdf/2020-23780.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2020/10/26/2020-23780/creating-schedule-f-in-the-excepted-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Modernization and Consolidation of Occupational Series",
+    "opm_date": "Friday, April 24, 2026",
+    "opm_year": 2026,
+    "opm_from": "Veronica E. Hinton, Associate Director, Workforce Policy and Innovation",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/modernization-and-consolidation-of-occupational-series.pdf",
+    "detected_eo_numbers": [
+      "13932",
+      "14170"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "13932",
+        "title": "Modernizing and Reforming the Assessment and Hiring of Federal Job Candidates",
+        "president": "Donald J. Trump",
+        "signing_date": "2020-06-26",
+        "publication_date": "2020-07-01",
+        "citation": "85 FR 39457",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2020-07-01/pdf/2020-14337.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2020/07/01/2020-14337/modernizing-and-reforming-the-assessment-and-hiring-of-federal-job-candidates"
+      },
+      {
+        "executive_order_number": "14170",
+        "title": "Reforming the Federal Hiring Process and Restoring Merit to Government Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-01-20",
+        "publication_date": "2025-01-30",
+        "citation": "90 FR 8621",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-01-30/pdf/2025-02094.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/01/30/2025-02094/reforming-the-federal-hiring-process-and-restoring-merit-to-government-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Federal Workforce Competency Initiative – General and Technical Competencies and Competency Frameworks for Information Technology Management, 2210",
+    "opm_date": "Monday, April 13, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/federal-workforce-competency-initiative-general-and-technical-competencies-and-competency-frameworks-for-information-technology-management-2210.pdf",
+    "detected_eo_numbers": [
+      "13932",
+      "14170"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "13932",
+        "title": "Modernizing and Reforming the Assessment and Hiring of Federal Job Candidates",
+        "president": "Donald J. Trump",
+        "signing_date": "2020-06-26",
+        "publication_date": "2020-07-01",
+        "citation": "85 FR 39457",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2020-07-01/pdf/2020-14337.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2020/07/01/2020-14337/modernizing-and-reforming-the-assessment-and-hiring-of-federal-job-candidates"
+      },
+      {
+        "executive_order_number": "14170",
+        "title": "Reforming the Federal Hiring Process and Restoring Merit to Government Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-01-20",
+        "publication_date": "2025-01-30",
+        "citation": "90 FR 8621",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-01-30/pdf/2025-02094.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/01/30/2025-02094/reforming-the-federal-hiring-process-and-restoring-merit-to-government-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Issuance of the Competency Based Position Classification Standard for the Information Technology Management Series, 2210",
+    "opm_date": "Monday, April 13, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/issuance-of-the-competency-based-position-classification-standard-for-the-information-technology-management-series-2210.pdf",
+    "detected_eo_numbers": [
+      "13932",
+      "14170"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "13932",
+        "title": "Modernizing and Reforming the Assessment and Hiring of Federal Job Candidates",
+        "president": "Donald J. Trump",
+        "signing_date": "2020-06-26",
+        "publication_date": "2020-07-01",
+        "citation": "85 FR 39457",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2020-07-01/pdf/2020-14337.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2020/07/01/2020-14337/modernizing-and-reforming-the-assessment-and-hiring-of-federal-job-candidates"
+      },
+      {
+        "executive_order_number": "14170",
+        "title": "Reforming the Federal Hiring Process and Restoring Merit to Government Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-01-20",
+        "publication_date": "2025-01-30",
+        "citation": "90 FR 8621",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-01-30/pdf/2025-02094.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/01/30/2025-02094/reforming-the-federal-hiring-process-and-restoring-merit-to-government-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Competency-Based Qualification Standards for the Information Technology Management Series, 2210",
+    "opm_date": "Monday, April 13, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/competency-based-qualification-standards-for-the-information-technology-management-series-2210.pdf",
+    "detected_eo_numbers": [
+      "13932",
+      "14170"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "13932",
+        "title": "Modernizing and Reforming the Assessment and Hiring of Federal Job Candidates",
+        "president": "Donald J. Trump",
+        "signing_date": "2020-06-26",
+        "publication_date": "2020-07-01",
+        "citation": "85 FR 39457",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2020-07-01/pdf/2020-14337.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2020/07/01/2020-14337/modernizing-and-reforming-the-assessment-and-hiring-of-federal-job-candidates"
+      },
+      {
+        "executive_order_number": "14170",
+        "title": "Reforming the Federal Hiring Process and Restoring Merit to Government Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-01-20",
+        "publication_date": "2025-01-30",
+        "citation": "90 FR 8621",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-01-30/pdf/2025-02094.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/01/30/2025-02094/reforming-the-federal-hiring-process-and-restoring-merit-to-government-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Recent Pay and Leave-Related Legislative Changes",
+    "opm_date": "Thursday, March 19, 2026",
+    "opm_year": 2026,
+    "opm_from": "Veronica E. Hinton, Associate Director, Workforce Policy and Innovation",
+    "opm_reference_id": "CPM 2026-06",
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/recent-pay-and-leave-related-legislative-changes-1.pdf",
+    "detected_eo_numbers": [
+      "13303",
+      "13315",
+      "13350",
+      "13364",
+      "13438",
+      "13668"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "13303",
+        "title": "Protecting the Development Fund for Iraq and Certain Other Property in Which Iraq Has an Interest",
+        "president": "George W. Bush",
+        "signing_date": "2003-05-22",
+        "publication_date": "2003-05-28",
+        "citation": "68 FR 31931",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2003-05-28/pdf/03-13412.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2003/05/28/03-13412/protecting-the-development-fund-for-iraq-and-certain-other-property-in-which-iraq-has-an-interest"
+      },
+      {
+        "executive_order_number": "13315",
+        "title": "Blocking Property of the Former Iraqi Regime, Its Senior Officials and Their Family Members, and Taking Certain Other Actions",
+        "president": "George W. Bush",
+        "signing_date": "2003-08-28",
+        "publication_date": "2003-09-03",
+        "citation": "68 FR 52315",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2003-09-03/pdf/03-22543.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2003/09/03/03-22543/blocking-property-of-the-former-iraqi-regime-its-senior-officials-and-their-family-members-and"
+      },
+      {
+        "executive_order_number": "13350",
+        "title": "Termination of Emergency Declared in Executive Order 12722 With Respect to Iraq and Modification of Executive Order 13290, Executive Order 13303, and Executive Order 13315",
+        "president": "George W. Bush",
+        "signing_date": "2004-07-29",
+        "publication_date": "2004-07-30",
+        "citation": "69 FR 46055",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2004-07-30/pdf/04-17636.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2004/07/30/04-17636/termination-of-emergency-declared-in-executive-order-12722-with-respect-to-iraq-and-modification-of"
+      },
+      {
+        "executive_order_number": "13364",
+        "title": "Modifying the Protection Granted to the Development Fund for Iraq and Certain Property in Which Iraq Has an Interest and Protecting the Central Bank of Iraq",
+        "president": "George W. Bush",
+        "signing_date": "2004-11-29",
+        "publication_date": "2004-12-02",
+        "citation": "69 FR 70177",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2004-12-02/pdf/04-26686.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2004/12/02/04-26686/modifying-the-protection-granted-to-the-development-fund-for-iraq-and-certain-property-in-which-iraq"
+      },
+      {
+        "executive_order_number": "13438",
+        "title": "Blocking Property of Certain Persons Who Threaten Stabilization Efforts in Iraq",
+        "president": "George W. Bush",
+        "signing_date": "2007-07-17",
+        "publication_date": "2007-07-19",
+        "citation": "72 FR 39719",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2007-07-19/pdf/07-3552.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2007/07/19/07-3552/blocking-property-of-certain-persons-who-threaten-stabilization-efforts-in-iraq"
+      },
+      {
+        "executive_order_number": "13668",
+        "title": "Ending Immunities Granted to the Development Fund for Iraq and Certain Other Iraqi Property and Interests in Property Pursuant to Executive Order 13303, as Amended",
+        "president": "Barack Obama",
+        "signing_date": "2014-05-27",
+        "publication_date": "2014-05-29",
+        "citation": "79 FR 31019",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2014-05-29/pdf/2014-12651.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2014/05/29/2014-12651/ending-immunities-granted-to-the-development-fund-for-iraq-and-certain-other-iraqi-property-and"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Modernizing HR Services by Establishing the OPM HR Shared Service Center",
+    "opm_date": "Tuesday, March 17, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/modernizing-hr-services-by-establishing-the-opm-hr-shared-service-center.pdf",
+    "detected_eo_numbers": [
+      "14243"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "14243",
+        "title": "Stopping Waste, Fraud, and Abuse by Eliminating Information Silos",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-03-20",
+        "publication_date": "2025-03-25",
+        "citation": "90 FR 13681",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-03-25/pdf/2025-05214.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/03/25/2025-05214/stopping-waste-fraud-and-abuse-by-eliminating-information-silos"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Streamlining Vetting Processes in Support of the Merit Hiring Plan",
+    "opm_date": "Tuesday, March 17, 2026",
+    "opm_year": 2026,
+    "opm_from": "Joe Knouff, Suitability Director, Suitability Executive Agent Programs",
+    "opm_reference_id": "SuitEA Notice 2026-01",
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/streamlining-vetting-processes-in-support-of-the-merit-hiring-plan.pdf",
+    "detected_eo_numbers": [
+      "14170"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "14170",
+        "title": "Reforming the Federal Hiring Process and Restoring Merit to Government Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-01-20",
+        "publication_date": "2025-01-30",
+        "citation": "90 FR 8621",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-01-30/pdf/2025-02094.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/01/30/2025-02094/reforming-the-federal-hiring-process-and-restoring-merit-to-government-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Creating Efficiency Using OPM’s Personnel Vetting and Security Services",
+    "opm_date": "Tuesday, March 03, 2026",
+    "opm_year": 2026,
+    "opm_from": "Christopher J. Beckman Director OPM, Facilities, Security, and Emergency Management; and Joseph M. Knouff Suitability Director OPM, Suitability Executive Agent Programs",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/creating-efficiency-using-opm-s-personnel-vetting-and-security-services.pdf",
+    "detected_eo_numbers": [
+      "12968"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "12968",
+        "title": "Access to Classified Information",
+        "president": "William J. Clinton",
+        "signing_date": "1995-08-02",
+        "publication_date": "1995-08-07",
+        "citation": "60 FR 40245",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-1995-08-07/pdf/95-19654.pdf",
+        "html_url": "https://www.federalregister.gov/documents/1995/08/07/95-19654/access-to-classified-information"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Implementation of Executive Orders 14251 and 14343",
+    "opm_date": "Thursday, February 12, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/implementation-of-executive-orders-14251-and-14343.pdf",
+    "detected_eo_numbers": [
+      "14251",
+      "14343"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "14251",
+        "title": "Exclusions From Federal Labor-Management Relations Programs",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-03-27",
+        "publication_date": "2025-04-03",
+        "citation": "90 FR 14553",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-04-03/pdf/2025-05836.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/04/03/2025-05836/exclusions-from-federal-labor-management-relations-programs"
+      },
+      {
+        "executive_order_number": "14343",
+        "title": "Further Exclusions From the Federal Labor- Management Relations Program",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-08-28",
+        "publication_date": "2025-09-03",
+        "citation": "90 FR 42683",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-09-03/pdf/2025-16924.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/09/03/2025-16924/further-exclusions-from-the-federal-labor--management-relations-program"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  },
+  {
+    "opm_title": "Initial Implementing Guidance for Schedule Policy/Career Final Rule (Improving Performance, Accountability and Responsiveness in the Civil Service)",
+    "opm_date": "Thursday, February 05, 2026",
+    "opm_year": 2026,
+    "opm_from": "Scott Kupor, Director, Office of Personnel Management",
+    "opm_reference_id": null,
+    "opm_pdf_url": "https://www.opm.gov/chcoc/latest-memos/opm-schedule-policycareer-implementation-guidance-memorandum.pdf",
+    "detected_eo_numbers": [
+      "14171",
+      "13957"
+    ],
+    "matched_eos": [
+      {
+        "executive_order_number": "14171",
+        "title": "Restoring Accountability to Policy-Influencing Positions Within the Federal Workforce",
+        "president": "Donald J. Trump",
+        "signing_date": "2025-01-20",
+        "publication_date": "2025-01-31",
+        "citation": "90 FR 8625",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2025-01-31/pdf/2025-02095.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2025/01/31/2025-02095/restoring-accountability-to-policy-influencing-positions-within-the-federal-workforce"
+      },
+      {
+        "executive_order_number": "13957",
+        "title": "Creating Schedule F in the Excepted Service",
+        "president": "Donald J. Trump",
+        "signing_date": "2020-10-21",
+        "publication_date": "2020-10-26",
+        "citation": "85 FR 67631",
+        "pdf_url": "https://www.govinfo.gov/content/pkg/FR-2020-10-26/pdf/2020-23780.pdf",
+        "html_url": "https://www.federalregister.gov/documents/2020/10/26/2020-23780/creating-schedule-f-in-the-excepted-service"
+      }
+    ],
+    "unmatched_eo_numbers": []
+  }
+]
